@@ -4,7 +4,7 @@ Thank you to everyone who has contributed to TealTiger! 🐯
 
 ## Founding Contributors
 
-- **[@mvanhorn](https://github.com/mvanhorn)** (Matt Van Horn) — Anthropic Claude quickstart examples (TypeScript + Python) PR #21, GitHub Actions CI workflow PR #24, CrewAI integration example PR #25
+- **[@mvanhorn](https://github.com/mvanhorn)** (Matt Van Horn) — Anthropic Claude quickstart examples (TypeScript + Python) PR #21, GitHub Actions CI workflow PR #24, CrewAI integration example PR #25, Python quickstart example Issue #12
 - **[@tmchow](https://github.com/tmchow)** (Trevin Chow) — TypeScript streaming example with guardrails and error handling — PR #23
 
 ## Core Team

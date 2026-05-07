@@ -96,15 +96,6 @@ response = client.chat.completions.create(
 # Guardrails enforced. Cost tracked. Evidence produced.
 ```
 
-**Docker Sidecar (any language):**
-```bash
-docker run -p 8080:8080 tealtigeradmin/tealtiger-typescript:1.2-governance
-
-curl -X POST http://localhost:8080/evaluate \
-  -H "Content-Type: application/json" \
-  -d '{"action": "tool.execute", "tool_name": "web_search", "context": {"user_id": "user-123"}}'
-```
-
 ---
 
 ## ✨ Features
@@ -138,26 +129,55 @@ curl -X POST http://localhost:8080/evaluate \
 - **Policy Traceability** — Every verdict traces to the human policy author
 - **OWASP ASI Coverage** — Addresses 8/10 OWASP Top 10 for Agentic Applications
 
-### 🆕 Governance Bundle (v1.2.0)
-- **TealEngineV12** — Parallel module evaluation with "most restrictive action wins" merge
-- **TealSecrets** — Secret detection with 500+ patterns and confidence scoring
-- **TealRegistry** — Model/tool allowlisting with provenance verification
-- **TealReliability** — Retry budgets, circuit breakers, and fallback chains
-- **TealMemory** — Memory governance across 5 scopes and 4 classifications
-- **GovernanceDashboard** — Governance visibility UI
-- **BundleExporter** — Evidence export in SARIF v2.1.0, JUnit XML, and JSON
-- **Docker Sidecar** — Language-agnostic governance via HTTP (`POST /evaluate`)
+---
+
+## 🗺️ Governance Coverage Map
+
+```mermaid
+mindmap
+  root((TealTiger<br/>AI Agent<br/>Governance))
+    Security
+      Secret Detection — TealSecrets
+      Prompt Injection — TealGuard
+      Content Moderation — TealGuard
+      PII Detection — TealGuard
+    Authority & Identity
+      Tool Allowlisting — TealRegistry
+      Model Allowlisting — TealRegistry
+      Provenance Verification — TealRegistry
+    Reliability
+      Circuit Breaker — TealCircuit
+      Retry Budgets — TealReliability
+      Fallback Chains — TealReliability
+    Memory
+      Write Governance — TealMemory
+      Read Scope Enforcement — TealMemory
+      Retention & TTL — TealMemory
+    Cost
+      Budget Enforcement — TealMonitor
+      Per-Request Tracking — TealMonitor
+      Anomaly Detection — TealMonitor
+    Evidence & Audit
+      Versioned Audit Logs — TealAudit
+      SARIF v2.1.0 Export — TealVerify
+      JUnit XML Export — TealVerify
+      Correlation IDs — TealEngine
+    Policy
+      ENFORCE / MONITOR / REPORT_ONLY — TealEngine
+      Deterministic Decisions — TealEngine
+      7 Provider Support — TealEngine
+```
+
+> **Design principle:** No LLM in the governance path. Same input + same policy = same decision, every time.
 
 ---
 
-## 📦 SDKs & Integrations
+## 📦 SDKs
 
-| Component | Source Code | Package | Install |
-|-----------|------------|---------|---------|
-| TypeScript SDK | [tealtiger-typescript-prod](https://github.com/agentguard-ai/tealtiger-typescript-prod) | [npm](https://www.npmjs.com/package/tealtiger) | `npm install tealtiger` |
-| Python SDK | [tealtiger-python-prod](https://github.com/agentguard-ai/tealtiger-python-prod) | [PyPI](https://pypi.org/project/tealtiger/) | `pip install tealtiger` |
-| Helm Charts | [helm-charts](https://github.com/agentguard-ai/helm-charts) | [Helm](https://agentguard-ai.github.io/helm-charts) | `helm repo add tealtiger https://agentguard-ai.github.io/helm-charts` |
-| GitHub Action | [tealtiger-action](https://github.com/agentguard-ai/tealtiger-action) | [Marketplace](https://github.com/agentguard-ai/tealtiger-action) | `uses: agentguard-ai/tealtiger-action@v1` |
+| Language | Source Code | Package | Install |
+|----------|------------|---------|---------|
+| TypeScript | [tealtiger-typescript-prod](https://github.com/agentguard-ai/tealtiger-typescript-prod) | [npm](https://www.npmjs.com/package/tealtiger) | `npm install tealtiger` |
+| Python | [tealtiger-python-prod](https://github.com/agentguard-ai/tealtiger-python-prod) | [PyPI](https://pypi.org/project/tealtiger/) | `pip install tealtiger` |
 
 ---
 
@@ -223,7 +243,9 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
 ## 🗺️ Roadmap
 
-**Current:** v1.2.0 — Governance Bundle
+**Current:** v1.1.0 — 7 providers, TealEngine, guardrails, cost tracking
+
+**Next:** v1.2.0 — Governance Bundle
 - 7 governance modules across 6 dimensions
 - Formal evidence contract with named reason codes
 - Secret detection (500+ patterns, confidence scoring)
@@ -231,13 +253,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 - Reliability controls (retry budgets, circuit breakers, fallback chains)
 - Model/tool registry with allowlisting and provenance verification
 - Evidence export (SARIF v2.1.0, JUnit XML, JSON)
-- Docker sidecar for language-agnostic governance
 
-**Next:** v1.3.0 — Cloud Integrations & Ecosystem
-- Cloud agent platform integrations (AWS AgentCore, Bedrock Agents, Azure AI Foundry, GCP Vertex AI)
-- Framework integrations (LangChain, CrewAI, AutoGen, LlamaIndex, Strands)
-- AI Risk Register
-- Policy registry at registry.tealtiger.ai
+See the roadmap section above for the full plan.
 
 ---
 
