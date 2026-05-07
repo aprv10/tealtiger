@@ -8,289 +8,171 @@ Security is our top priority. We take all security vulnerabilities seriously.
 
 **Please DO NOT report security vulnerabilities through public GitHub issues.**
 
-Instead, please report them via email to:
+Report via GitHub Security Advisories:
 
-**Please use GitHub Security Advisories to report vulnerabilities:**
+👉 https://github.com/agentguard-ai/tealtiger/security/advisories/new
 
-<<<<<<< HEAD
-https://github.com/agentguard-ai/tealtiger/security/advisories/new
-=======
-https://github.com/agentguard-ai/tealtiger-sdk/security/advisories/new
->>>>>>> 8845eb6888bee5ea34f0a66b9da1a773d51da53a
-
-**Note**: If you get a 404 error, Security Advisories may not be enabled yet. In that case, please:
+If you get a 404 error (Security Advisories not enabled), please:
 1. Open a GitHub issue with the title prefix `[SECURITY]` (do NOT include sensitive details)
 2. We will contact you privately to discuss the vulnerability details
 
 ### What to Include
 
-Please include as much of the following information as possible:
-
-- **Type of vulnerability** (e.g., authentication bypass, injection, etc.)
+- **Type of vulnerability** (e.g., pattern bypass, policy evasion, evidence tampering)
 - **Full paths of source file(s)** related to the vulnerability
-- **Location of the affected source code** (tag/branch/commit or direct URL)
 - **Step-by-step instructions** to reproduce the issue
 - **Proof-of-concept or exploit code** (if possible)
 - **Impact of the vulnerability** and how an attacker might exploit it
-- **Any potential mitigations** you've identified
 
 ### Response Timeline
 
-- **Initial Response**: Within 24 hours
-- **Status Update**: Within 72 hours
-- **Fix Timeline**: Depends on severity
-  - **Critical**: 1-7 days
-  - **High**: 7-14 days
-  - **Medium**: 14-30 days
-  - **Low**: 30-90 days
+| Severity | Initial Response | Fix Timeline |
+|----------|-----------------|--------------|
+| Critical | 24 hours | 1-7 days |
+| High | 24 hours | 7-14 days |
+| Medium | 72 hours | 14-30 days |
+| Low | 72 hours | 30-90 days |
 
-### What to Expect
-
-1. **Acknowledgment** - We'll confirm receipt of your report
-2. **Investigation** - We'll investigate and validate the vulnerability
-3. **Fix Development** - We'll develop and test a fix
-4. **Disclosure** - We'll coordinate disclosure with you
-5. **Credit** - We'll credit you in our security advisories (if desired)
-
-## 🛡️ Security Measures
-
-### Current Security Features
-
-- **API Key Authentication** - Secure authentication for all API calls
-- **HTTPS Only** - All communications encrypted in transit
-- **Input Validation** - Comprehensive validation of all inputs
-- **Rate Limiting** - Protection against abuse
-- **Audit Logging** - Complete audit trail of all actions
-- **Dependency Scanning** - Regular security audits of dependencies
-
-### Secure Development Practices
-
-- **Code Review** - All code changes reviewed before merge
-- **Automated Testing** - Comprehensive test suite including security tests
-- **Dependency Updates** - Regular updates to address known vulnerabilities
-- **Static Analysis** - Automated security scanning in CI/CD
-- **Least Privilege** - Minimal permissions by default
+---
 
 ## 🔐 Supported Versions
 
-We provide security updates for the following versions:
+| Version | Supported | Notes |
+|---------|-----------|-------|
+| 1.2.x | ✅ Yes | Current stable release |
+| 1.1.x | ✅ Yes | Security patches only |
+| < 1.1.0 | ❌ No | End of life |
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | ✅ Yes             |
-| < 0.1.0 | ❌ No              |
+---
 
-## 🚨 Known Security Considerations
+## 🛡️ What TealTiger Protects (and What It Doesn't)
 
-### API Key Management
+### What TealTiger Governance Covers
 
-**Risk**: Exposed API keys can lead to unauthorized access
+| Threat | TealTiger Control | Module |
+|--------|-------------------|--------|
+| Prompt injection | Regex + conjunction pattern detection | TealGuard |
+| Secret/credential leakage | 500+ pattern detection with confidence scoring | TealSecrets |
+| PII in inputs/outputs | Pattern-based PII detection and redaction | TealGuard |
+| Excessive cost | Budget enforcement (per-request, session, daily) | TealMonitor |
+| Unauthorized tool use | Tool/model allowlisting with provenance | TealRegistry |
+| Cascading failures | Circuit breaker with retry budgets | TealCircuit |
+| Memory poisoning | Write governance, scope enforcement, TTL | TealMemory |
+| Audit trail gaps | Versioned logging, SARIF/JUnit export | TealAudit |
 
-**Mitigation**:
-- Never commit API keys to version control
-- Use environment variables for API keys
-- Rotate API keys regularly
-- Use different keys for different environments
+### What TealTiger Does NOT Cover
 
-```typescript
-// ✅ Good - Use environment variables
-const client = new TealOpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+| Threat | Why | Recommendation |
+|--------|-----|----------------|
+| Model alignment failures | Requires model internals access | Use alignment evaluation tools |
+| Training data poisoning | Happens before runtime | Use data validation pipelines |
+| Network-level attacks (MITM) | Infrastructure concern | Use TLS, certificate pinning |
+| LLM hallucinations | Requires output factuality checking | Use grounding/RAG verification |
+| Side-channel attacks (timing) | Infrastructure-layer | Use packet padding, response batching |
 
-// ❌ Bad - Hardcoded API key
-const client = new TealOpenAI({
-  apiKey: 'sk-1234567890abcdef'
-});
-```
+### Key Architectural Security Properties
 
-### Network Security
+- **No LLM in the governance path** — Governance decisions are deterministic regex/pattern-based. The governance layer cannot be prompt-injected.
+- **Deterministic decisions** — Same input + same policy = same decision, every time. Reproducible and auditable.
+- **SDK-only architecture** — No external infrastructure dependency. No data leaves the process unless explicitly configured (telemetry export).
+- **Fail-closed by default** — TealEngine's parallel evaluation uses "most restrictive action wins" merge.
 
-**Risk**: Man-in-the-middle attacks on unencrypted connections
+---
 
-**Mitigation**:
-- Always use HTTPS for SSA connections
-- Validate SSL certificates
-- Use certificate pinning for high-security environments
+## 🚨 Threat Model: Governance Bypass
 
-```typescript
-<<<<<<< HEAD
-// ✅ Good - HTTPS URL
-=======
-// ✅ Good - HTTPS (OpenAI/Anthropic APIs use HTTPS by default)
->>>>>>> 8845eb6888bee5ea34f0a66b9da1a773d51da53a
-const client = new TealOpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+TealTiger's primary threat model addresses attempts to weaken, bypass, or tamper with governance enforcement.
 
-// Note: TealTiger uses OpenAI/Anthropic APIs directly
-<<<<<<< HEAD
-// No separate SSA URL needed for v1.0.0
-=======
-// All connections are HTTPS by default
->>>>>>> 8845eb6888bee5ea34f0a66b9da1a773d51da53a
-```
+### Threat Actors
 
-### Input Validation
+| Actor | Motivation | Capability |
+|-------|-----------|------------|
+| Curious developer | Relax enforcement for velocity | Modify app code, set env vars |
+| Malicious insider | Intentionally bypass controls | Access to code, config, CI/CD |
+| Compromised workload | Attacker controls runtime | Full app-level access |
+| Network attacker | MITM during artifact fetch | Network-level interception |
 
-**Risk**: Injection attacks through unvalidated inputs
+### Key Controls (v1.2)
 
-**Mitigation**:
-- SDK validates all inputs before sending to SSA
-- Use TypeScript types for compile-time validation
-- Sanitize user inputs before passing to tools
+| Threat | Control |
+|--------|---------|
+| Developer disables enforcement | No bypass flags exist in SDK API |
+| Local policy override | SDK does not load local policies in production mode |
+| Registry impersonation | TLS + endpoint allow-listing |
+| Evidence tampering | Versioned, append-only audit logs with policy version references |
+| SDK removal | Detectable via missing TEEC evidence (platform-level control) |
 
-```typescript
-// ✅ Good - Validated input
-const result = await client.chat.completions.create({
-  model: 'gpt-4',
-  messages: [{ 
-    role: 'user', 
-    content: sanitizeInput(userInput) 
-  }],
-  max_tokens: Math.min(userMaxTokens, 4000)
-});
-```
+### Residual Risks (Honest Assessment)
 
-### Dependency Security
+- A developer CAN remove the SDK from their application entirely. This is detectable (missing evidence) but not preventable at the SDK layer alone.
+- Pattern-based detection has recall limitations (currently 50% on PINT benchmark). Novel attack phrasing can evade detection.
+- The SDK trusts the configured registry endpoint. If the registry itself is compromised, governance artifacts could be tampered with.
 
-**Risk**: Vulnerabilities in third-party dependencies
+For the full threat model, see: `TealTiger-SOT/diagrams/tealtiger_threat_model_policy_tampering.md`
 
-**Mitigation**:
-- Regular dependency audits (`npm audit`)
-- Automated dependency updates (Dependabot)
-- Minimal dependency footprint
-- Pinned dependency versions
+---
 
-## 🔍 Security Audits
-
-### Internal Audits
-
-- **Code Review**: Every pull request
-- **Dependency Scan**: Weekly
-- **Static Analysis**: On every commit
-- **Penetration Testing**: Quarterly
-
-### External Audits
-
-We welcome security researchers to audit our code:
-
-- **Bug Bounty**: Coming soon
-- **Responsible Disclosure**: Always welcome
-- **Public Audits**: Planned for v1.0.0
-
-## 📋 Security Checklist for Users
+## 🔍 Security Practices
 
 ### Development
 
-- [ ] Store API keys in environment variables
-- [ ] Use HTTPS for all SSA connections
-- [ ] Validate and sanitize all user inputs
+- **Code Review** — All changes reviewed before merge
+- **Automated Testing** — Security-focused test suite including adversarial probes
+- **Dependency Scanning** — Regular audits (`npm audit`, `pip audit`)
+- **Static Analysis** — Automated scanning in CI/CD
+- **Red Team Benchmarking** — Garak + PINT benchmarks run on every release
+
+### For Users
+
+**Development checklist:**
+- [ ] Store API keys in environment variables (never in code)
 - [ ] Keep SDK updated to latest version
-- [ ] Review security advisories regularly
-- [ ] Enable audit logging
-- [ ] Implement rate limiting
-- [ ] Use least-privilege policies
+- [ ] Enable all guardrails appropriate for your use case
+- [ ] Review governance decisions in REPORT_ONLY mode before enabling ENFORCE
+- [ ] Set cost budgets appropriate for your workload
 
-### Production
-
+**Production checklist:**
+- [ ] Enable ENFORCE mode for all critical guardrails
+- [ ] Configure cost budgets with hard limits
+- [ ] Export audit evidence to your SIEM
+- [ ] Monitor for governance decision anomalies
 - [ ] Rotate API keys regularly
-- [ ] Monitor for suspicious activity
-- [ ] Set up security alerts
-- [ ] Implement backup and recovery
 - [ ] Use separate keys per environment
-- [ ] Enable all security features
-- [ ] Regular security audits
-- [ ] Incident response plan
 
-## 🚀 Security Roadmap
+---
 
-### Planned Security Features
-
-- **v0.2.0**
-  - Built-in guardrails for common threats
-  - PII detection and redaction
-  - Content moderation
-  - Prompt injection detection
-
-- **v0.3.0**
-  - Advanced threat detection
-  - Behavioral analysis
-  - Anomaly detection
-  - Threat intelligence integration
-
-- **v1.0.0**
-  - Security certification (SOC 2)
-  - Compliance frameworks (HIPAA, GDPR)
-  - Advanced encryption
-  - Zero-trust architecture
-
-## 📚 Security Resources
-
-### Documentation
-
-<<<<<<< HEAD
-- [Security Best Practices](https://tealtiger.co.in/docs/security)
-- [API Security Guide](https://tealtiger.co.in/docs/api-security)
-- [Threat Model](https://tealtiger.co.in/docs/threat-model)
-
-### Tools
-=======
-- [Security Best Practices](https://github.com/agentguard-ai/tealtiger#readme)
-- [API Documentation](https://github.com/agentguard-ai/tealtiger-sdk#readme)
-
-### Examples
->>>>>>> 8845eb6888bee5ea34f0a66b9da1a773d51da53a
-
-- [Security Examples](https://github.com/agentguard-ai/tealtiger/tree/main/examples)
-
-## 🏆 Security Hall of Fame
-
-We recognize security researchers who help us improve:
-
-*No vulnerabilities reported yet - be the first!*
-
-## 📞 Contact
-
-<<<<<<< HEAD
-- **Security Issues**: Use [GitHub Security Advisories](https://github.com/agentguard-ai/tealtiger/security/advisories/new)
-- **GitHub**: [agentguard-ai/tealtiger](https://github.com/agentguard-ai/tealtiger)
-=======
-- **Security Issues**: Use [GitHub Security Advisories](https://github.com/agentguard-ai/tealtiger-sdk/security/advisories/new)
-- **GitHub**: [agentguard-ai/tealtiger-sdk](https://github.com/agentguard-ai/tealtiger-sdk)
->>>>>>> 8845eb6888bee5ea34f0a66b9da1a773d51da53a
-
-## 📄 Disclosure Policy
-
-### Coordinated Disclosure
+## 📋 Disclosure Policy
 
 We follow coordinated disclosure:
 
-1. **Report** - Researcher reports vulnerability privately
-2. **Acknowledge** - We acknowledge within 24 hours
-3. **Fix** - We develop and test a fix
-4. **Release** - We release the fix
-5. **Disclose** - We publicly disclose (coordinated with researcher)
-
-### Public Disclosure Timeline
-
-- **Critical**: 7 days after fix release
-- **High**: 14 days after fix release
-- **Medium**: 30 days after fix release
-- **Low**: 90 days after fix release
+1. **Report** — Researcher reports vulnerability privately
+2. **Acknowledge** — We acknowledge within 24 hours
+3. **Fix** — We develop and test a fix
+4. **Release** — We release the fix
+5. **Disclose** — We publicly disclose (coordinated with researcher)
 
 ### Credit Policy
 
 We credit security researchers in:
 - Security advisories
 - Release notes
-- Security Hall of Fame
-- Social media (with permission)
+- Security Hall of Fame (below)
 
 ---
 
-<<<<<<< HEAD
+## 🏆 Security Hall of Fame
+
+We recognize security researchers who help us improve:
+
+*No vulnerabilities reported yet — be the first!*
+
+---
+
+## 📞 Contact
+
+- **Security Issues**: [GitHub Security Advisories](https://github.com/agentguard-ai/tealtiger/security/advisories/new)
+- **GitHub**: [agentguard-ai/tealtiger](https://github.com/agentguard-ai/tealtiger)
+
+---
+
 **Thank you for helping keep TealTiger secure!** 🔒
-=======
-**Thank you for helping keep TealTiger SDK secure!** 🔒
->>>>>>> 8845eb6888bee5ea34f0a66b9da1a773d51da53a
