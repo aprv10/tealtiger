@@ -131,42 +131,17 @@ response = client.chat.completions.create(
 
 ---
 
-## 🗺️ Governance Coverage Map
+## 🗺️ Governance Coverage
 
-```mermaid
-mindmap
-  root((TealTiger<br/>AI Agent<br/>Governance))
-    Security
-      Secret Detection — TealSecrets
-      Prompt Injection — TealGuard
-      Content Moderation — TealGuard
-      PII Detection — TealGuard
-    Authority & Identity
-      Tool Allowlisting — TealRegistry
-      Model Allowlisting — TealRegistry
-      Provenance Verification — TealRegistry
-    Reliability
-      Circuit Breaker — TealCircuit
-      Retry Budgets — TealReliability
-      Fallback Chains — TealReliability
-    Memory
-      Write Governance — TealMemory
-      Read Scope Enforcement — TealMemory
-      Retention & TTL — TealMemory
-    Cost
-      Budget Enforcement — TealMonitor
-      Per-Request Tracking — TealMonitor
-      Anomaly Detection — TealMonitor
-    Evidence & Audit
-      Versioned Audit Logs — TealAudit
-      SARIF v2.1.0 Export — TealVerify
-      JUnit XML Export — TealVerify
-      Correlation IDs — TealEngine
-    Policy
-      ENFORCE / MONITOR / REPORT_ONLY — TealEngine
-      Deterministic Decisions — TealEngine
-      7 Provider Support — TealEngine
-```
+| Dimension | What it does | Module |
+|-----------|-------------|--------|
+| 🛡️ **Security** | Secret detection (500+ patterns), prompt injection prevention, PII detection, content moderation | `TealSecrets` `TealGuard` |
+| 🔑 **Authority** | Tool/model allowlisting, provenance verification, supply chain scoring | `TealRegistry` |
+| ⚡ **Reliability** | Circuit breakers, retry budgets, fallback chains, deterministic degradation | `TealCircuit` `TealReliability` |
+| 🧠 **Memory** | Write governance, read scope enforcement (session/user/tenant), retention TTL | `TealMemory` |
+| 💰 **Cost** | Budget enforcement (per-request/session/daily), anomaly detection, cost tracking | `TealMonitor` |
+| 📋 **Evidence** | Versioned audit logs, SARIF v2.1.0 export, JUnit XML, correlation IDs | `TealAudit` `TealVerify` |
+| ⚙️ **Policy** | ENFORCE / MONITOR / REPORT_ONLY modes, deterministic decisions, 7 providers | `TealEngine` |
 
 > **Design principle:** No LLM in the governance path. Same input + same policy = same decision, every time.
 
