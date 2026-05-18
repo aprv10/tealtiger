@@ -6,6 +6,7 @@ Thank you to everyone who has contributed to TealTiger! 🐯
 
 - **[@mvanhorn](https://github.com/mvanhorn)** (Matt Van Horn) — Anthropic Claude quickstart examples (TypeScript + Python) PR #21, GitHub Actions CI workflow PR #24, CrewAI integration example PR #25, Python quickstart example Issue #12
 - **[@tmchow](https://github.com/tmchow)** (Trevin Chow) — TypeScript streaming example with guardrails and error handling — PR #23
+- **[@pntech20](https://github.com/pntech20)** — Fix GPT-4 Turbo preview cost tracking: longest-prefix model pricing lookup, `enableCostTracking` option, numeric `response.cost` field — PR #2 (tealtiger-typescript-prod)
 
 ## Core Team
 
