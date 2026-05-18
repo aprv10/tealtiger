@@ -128,6 +128,7 @@ Contributors are:
 
 ## Getting Help
 
+- **Discord:** [Join the TealTiger Community](https://discord.gg/X2ePf8QAj)
 - **Questions?** Open a [Discussion](https://github.com/agentguard-ai/tealtiger/discussions)
 - **Bug?** Open an [Issue](https://github.com/agentguard-ai/tealtiger/issues)
 - **Security?** See [SECURITY.md](SECURITY.md)
