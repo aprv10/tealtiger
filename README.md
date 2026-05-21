@@ -1,292 +1,334 @@
-# TealTiger
+# AgentGuard - Security and Cost Control for AI Applications
 
-<div align="center">
+> Enterprise-grade security, cost control, and guardrails for AI applications. Built to handle the complexity of autonomous agents, works with any AI API.
 
-<img src=".github/logo/tealtiger-logo-256.png" alt="TealTiger Logo" width="200">
+[![npm version](https://img.shields.io/npm/v/agentguard-sdk.svg)](https://www.npmjs.com/package/agentguard-sdk)
+[![PyPI version](https://img.shields.io/pypi/v/agentguard-sdk.svg)](https://pypi.org/project/agentguard-sdk/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 
-**AI Agent Security & Governance SDK**
+## 🎉 What's New in v0.2.2
 
-Deterministic governance, guardrails, cost tracking, and policy management for LLM applications.
-Open source. TypeScript + Python. Works with any provider.
+**Drop-in AI Client Wrappers with Built-in Security & Cost Control:**
+- ✅ **GuardedOpenAI** - OpenAI client with automatic cost tracking and guardrails
+- ✅ **GuardedAnthropic** - Anthropic client with budget enforcement
+- ✅ **GuardedAzureOpenAI** - Azure OpenAI client with PII detection
+- ✅ **Real-time Cost Tracking** - Track spending across 20+ AI models
+- ✅ **Budget Management** - Set limits and get alerts before overspending
+- ✅ **Built-in Guardrails** - PII detection, content moderation, prompt injection protection
+- ✅ **100% Feature Parity** - Same experience in TypeScript and Python
 
-[![npm version](https://badge.fury.io/js/tealtiger.svg)](https://www.npmjs.com/package/tealtiger)
-[![PyPI version](https://badge.fury.io/py/tealtiger.svg)](https://pypi.org/project/tealtiger/)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Discord](https://img.shields.io/badge/Discord-Join%20Community-7289da?logo=discord&logoColor=white)](https://discord.gg/X2ePf8QAj)
-[![GitHub stars](https://img.shields.io/github/stars/agentguard-ai/tealtiger?style=social)](https://github.com/agentguard-ai/tealtiger)
+**Built for the complexity of autonomous agents, works with any AI application.**
 
-[Website](https://tealtiger.co.in) · [Documentation](#documentation) · [Examples](#examples) · [Discord](https://discord.gg/X2ePf8QAj) · [Contributing](#-build-with-us)
+**[📖 Read the full announcement →](https://dev.to/nagasatish_chilakamarti_2/introducing-agentguard-v022-stop-ai-costs-from-spiraling-out-of-control-while-keeping-your-data-36a3)**
 
-</div>
+## 🚀 Quick Start (2 minutes)
 
----
-
-## What is TealTiger?
-
-TealTiger is an open-source SDK that provides **deterministic governance** for AI agents. It enforces security policies, tracks costs, and produces structured evidence — all at runtime, with no infrastructure required.
-
-> **Looking for the source code?** This is the hub repo. The SDK source lives in the language-specific repos:
-> - **TypeScript SDK**: [tealtiger-typescript-prod](https://github.com/agentguard-ai/tealtiger-typescript-prod)
-> - **Python SDK**: [tealtiger-python-prod](https://github.com/agentguard-ai/tealtiger-python-prod)
->
-> Or clone this repo with submodules: `git clone --recurse-submodules https://github.com/agentguard-ai/tealtiger.git`
-
-Unlike probabilistic safety filters, TealTiger uses **deterministic policy evaluation**: same input + same policy = same decision, every time. Every governance verdict is reconstructable, traceable to the human who authored the policy, and exportable as structured evidence (SARIF, JUnit XML, JSON).
-
-**Key principle:** Governance should be an engineering property embedded in the runtime — not a document reviewed after the fact.
-
----
-
-## 🚀 Quick Start
-
-### TypeScript
+### TypeScript/JavaScript
 
 ```bash
-npm install tealtiger
+npm install agentguard-sdk
 ```
 
 ```typescript
-import { TealOpenAI } from 'tealtiger';
+import { GuardedOpenAI, BudgetManager } from 'agentguard-sdk';
 
-const client = new TealOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  guardrails: {
-    piiDetection: true,
-    promptInjection: true,
-    contentModeration: true,
-  },
-  budget: {
-    maxCostPerRequest: 0.50,
-    maxCostPerDay: 10.00,
-  },
+// Create a budget
+const budgetManager = new BudgetManager();
+budgetManager.createBudget('my-agent', {
+  amount: 10.00,  // $10 daily limit
+  period: 'daily',
+  action: 'block'  // Block requests when limit reached
 });
 
+// Use GuardedOpenAI instead of OpenAI
+const client = new GuardedOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  agentId: 'my-agent',
+  budgetManager
+});
+
+// Make requests - costs tracked automatically
 const response = await client.chat.completions.create({
   model: 'gpt-4',
-  messages: [{ role: 'user', content: 'Hello!' }],
+  messages: [{ role: 'user', content: 'Hello!' }]
 });
-// Guardrails enforced. Cost tracked. Evidence produced.
+
+// Check costs anytime
+console.log('Total spent:', response.agentguard.cost.totalCost);
 ```
 
 ### Python
 
 ```bash
-pip install tealtiger
+pip install agentguard-sdk
 ```
 
 ```python
-from tealtiger import TealOpenAI
+from agentguard import GuardedOpenAI, BudgetManager
 
-client = TealOpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    guardrails={
-        "pii_detection": True,
-        "prompt_injection": True,
-        "content_moderation": True,
-    },
-    budget={
-        "max_cost_per_request": 0.50,
-        "max_cost_per_day": 10.00,
-    },
+# Create a budget
+budget_manager = BudgetManager()
+budget_manager.create_budget('my-agent', {
+    'amount': 10.00,  # $10 daily limit
+    'period': 'daily',
+    'action': 'block'
+})
+
+# Use GuardedOpenAI instead of OpenAI
+client = GuardedOpenAI(
+    api_key=os.environ['OPENAI_API_KEY'],
+    agent_id='my-agent',
+    budget_manager=budget_manager
 )
 
+# Make requests - costs tracked automatically
 response = client.chat.completions.create(
-    model="gpt-4",
-    messages=[{"role": "user", "content": "Hello!"}],
+    model='gpt-4',
+    messages=[{'role': 'user', 'content': 'Hello!'}]
 )
-# Guardrails enforced. Cost tracked. Evidence produced.
+
+# Check costs anytime
+print(f"Total spent: ${response.agentguard.cost.total_cost}")
 ```
 
----
+## 🎯 Why AgentGuard?
 
-## ✨ Features
+### The Problem
+- 💸 AI costs spiral out of control without visibility
+- 🔓 Sensitive data leaks through AI prompts
+- 🚨 No way to enforce spending limits
+- 🤷 Manual cost tracking is tedious and error-prone
 
-### 🛡️ Security Guardrails
-- **PII Detection** — Detect and redact sensitive information automatically
-- **Prompt Injection Prevention** — Block malicious prompt injection attempts
-- **Content Moderation** — Filter toxic, harmful, or inappropriate content
-- **Secret Detection** — 500+ patterns across 9 categories with confidence scoring
-- **Custom Rules** — Define your own security policies
+### The Solution
+- ✅ **Automatic Cost Tracking** - Every request tracked with zero effort
+- ✅ **Budget Enforcement** - Set limits and prevent overspending
+- ✅ **Built-in Security** - PII detection, content moderation, prompt injection protection
+- ✅ **Drop-in Replacement** - Works with existing OpenAI/Anthropic code
+- ✅ **No Infrastructure** - Client-side only, no servers or databases needed
 
-### 💰 Cost Governance
-- **Budget Enforcement** — Hard limits per request, session, and day
-- **Cost Tracking** — Real-time monitoring across all providers
-- **Cost Alerts** — Notifications at configurable thresholds
-- **Circuit Breakers** — Prevent runaway cost loops automatically
+## 🚀 Overview
 
-### 🔌 12 LLM Providers
-- **OpenAI** — GPT-4, GPT-4o, GPT-3.5
-- **Anthropic** — Claude 3.5, Claude 3
-- **Google Gemini** — Multimodal support
-- **AWS Bedrock** — Claude, Titan, Jurassic, Command, Llama
-- **Azure OpenAI** — Deployment-based routing
-- **Cohere** — Chat, RAG, embeddings
-- **Mistral AI** — European data residency
-- **DeepSeek** — Cost-efficient reasoning models
-- **Groq** — Ultra-low latency inference
-- **Together AI** — Open-source model hosting
-- **HuggingFace TGI** — Self-hosted inference
-- **xAI (Grok)** — Real-time knowledge
+AgentGuard is a **client-side SDK** that provides comprehensive security controls and cost management for AI applications:
 
-### 🔌 Platform Adapters
-- **AWS Bedrock Agents** — Native guardrail adapter
-- **AWS AgentCore** — Pre/post action governance plugin
-- **Azure AI Agent Service** — Tool-call pipeline middleware
+- **🛠️ Developer SDK** - Embed security controls and cost tracking with zero infrastructure
+- **💰 Cost Tracking** - Automatic cost calculation for 20+ AI models
+- **🛡️ Security Guardrails** - PII detection, content moderation, prompt injection protection
+- **📊 Budget Management** - Set spending limits and prevent overspending
 
-### 🏗️ Governance Architecture
-- **Deterministic Policy Evaluation** — No LLM in the governance path
-- **Structured Evidence** — Every decision produces a reconstructable record
-- **Cryptographic Proof** — Merkle trees + RFC 3161 timestamping (TealProof)
-- **Non-Human Identity (NHI)** — Agent lifecycle, scope enforcement, Zero Standing Privilege
-- **FREEZE Rules** — Immutable emergency kill switches with tamper detection
-- **Correlation IDs** — End-to-end traceability across the decision chain
-- **Policy Traceability** — Every verdict traces to the human policy author
-- **OWASP Agentic Top 10** — Zero-config policy pack covering all 10 ASI risks
+**No servers, no databases, no infrastructure required.** Just install and use!
 
----
+## ✨ Key Features
 
-## 🗺️ Governance Coverage
+### 🎯 Drop-in AI Client Wrappers
+Replace your existing AI clients with zero code changes:
+- **GuardedOpenAI** - Drop-in replacement for OpenAI client
+- **GuardedAnthropic** - Drop-in replacement for Anthropic client  
+- **GuardedAzureOpenAI** - Drop-in replacement for Azure OpenAI client
 
-| Dimension | What it does | Module |
-|-----------|-------------|--------|
-| 🛡️ **Security** | Secret detection (500+ patterns), prompt injection, PII, content moderation, Unicode normalization, encoded output detection | `TealSecrets` `TealGuard` |
-| 🔑 **Identity** | Non-Human Identity lifecycle, scope enforcement, Zero Standing Privilege, agent attestation | `TealEngine (NHI)` |
-| ⚡ **Reliability** | Circuit breakers, retry budgets, fallback chains, deterministic degradation | `TealCircuit` `TealReliability` |
-| 🧠 **Memory** | Write provenance, instruction injection detection, exfiltration prevention, scope enforcement | `TealMemory` |
-| 💰 **Cost** | Governance-owned ceilings, anomaly detection, reasoning-token budgets, per-agent attribution | `TealMonitor` |
-| 📋 **Evidence** | Cryptographic receipts (Merkle + RFC 3161), SARIF export, OTel spans, SIEM integration | `TealProof` `TealAudit` |
-| ⚙️ **Policy** | FREEZE rules, PLAN_ONLY mode, hot-swap bundles, anti-tamper, automation levels | `TealEngine` |
-| 🔄 **Workflow** | Declarative YAML governance workflows, org-level inheritance, floor enforcement | `TealFlow` |
-| 📊 **Drift** | Behavioral drift detection, statistical baselines, model output regression | `TealDrift` |
-| ⏱️ **Temporal** | Session TTL, cooldown periods, time-of-day restrictions | `TealTemporal` |
-| 🔍 **Registry** | MCP definition-drift monitoring, tool description scanning, adapter composition allowlist | `TealRegistry` |
-| 🧠 **Classification** | Local ONNX ML inference (≤20ms), ensemble modes, regex+ML combination | `TealClassifier` |
+### 💰 Cost Tracking & Budget Management
+- **Automatic Cost Calculation** - Track costs for 20+ AI models
+- **Real-time Budget Enforcement** - Set limits and prevent overspending
+- **Multi-period Budgets** - Hourly, daily, weekly, monthly, or total limits
+- **Alert Thresholds** - Get notified at 50%, 75%, 90%, 100%
+- **Cost Analytics** - Query costs by agent, date range, or request
 
-> **Design principle:** No LLM in the governance path. Same input + same policy = same decision, every time.
+### 🛡️ Built-in Guardrails
+- **PII Detection** - Automatically detect and redact sensitive data (emails, SSNs, credit cards)
+- **Content Moderation** - Block harmful content (hate speech, violence, harassment)
+- **Prompt Injection Protection** - Detect jailbreak attempts and instruction injection
+- **Custom Guardrails** - Build your own security rules
 
----
+### 🚀 Developer Experience
+- **No Infrastructure Required** - Everything runs client-side
+- **100% Type Safe** - Full TypeScript support with IntelliSense
+- **Framework Agnostic** - Works with any AI framework
+- **Comprehensive Testing** - 504 tests passing (318 TypeScript, 186 Python)
 
-## 📦 SDKs
+## 📦 Installation
 
-| Language | Source Code | Package | Install |
-|----------|------------|---------|---------|
-| TypeScript | [tealtiger-typescript-prod](https://github.com/agentguard-ai/tealtiger-typescript-prod) | [npm](https://www.npmjs.com/package/tealtiger) | `npm install tealtiger` |
-| Python | [tealtiger-python-prod](https://github.com/agentguard-ai/tealtiger-python-prod) | [PyPI](https://pypi.org/project/tealtiger/) | `pip install tealtiger` |
-
----
-
-## 📚 Documentation
-
-- [Quick Start Guide](#-quick-start)
-- [Security Guardrails](#️-security-guardrails)
-- [Cost Governance](#-cost-governance)
-- [Provider Setup](#-7-llm-providers)
-- [Contributing Guide](./CONTRIBUTING.md)
-- [Security Policy](./SECURITY.md)
-- [Code of Conduct](./CODE_OF_CONDUCT.md)
-- [Roadmap](./ROADMAP.md)
-
----
-
-## 🐯 Build With Us — Early Contributor Program
-
-TealTiger is open source and we're looking for early contributors to shape the future of AI agent governance.
-
-### What You Can Work On
-
-| Area | Examples | Difficulty |
-|------|----------|------------|
-| 🔍 Secret Detection | New detection patterns, custom categories | 🟢 Beginner |
-| 📝 Documentation | Guides, examples, API docs, typo fixes | 🟢 Beginner |
-| 🧪 Tests | Unit tests, property-based tests, integration tests | 🟡 Intermediate |
-| 🔌 Integrations | LangChain, CrewAI, AutoGen, LlamaIndex middleware | 🟡 Intermediate |
-| 💾 Memory Adapters | Redis, Pinecone, Weaviate, ChromaDB adapters | 🟡 Intermediate |
-| 🔄 CI/CD Templates | Jenkins, Azure Pipelines, Bitbucket Pipelines | 🟡 Intermediate |
-| 🏗️ Core Modules | Governance engine, evidence export, policy evaluation | 🔴 Advanced |
-
-### What Early Contributors Get
-
-- 🏆 **Named in CONTRIBUTORS.md** and release notes
-- 🎖️ **"Founding Contributor" badge** — first 25 merged PRs get permanent recognition
-- 📣 **Shoutout on TealTiger social channels** (LinkedIn, X, Dev.to)
-- 🔑 **Early access** to upcoming governance features before public release
-- 💬 **Direct access** to the core team via GitHub Discussions
-- 📝 **Co-authorship opportunity** on technical blog posts
-
-### Get Started
-
+### TypeScript/JavaScript
 ```bash
-# 1. Star this repo (it helps!)
-
-# 2. Fork and clone the SDK you want to contribute to:
-# TypeScript SDK:
-git clone https://github.com/agentguard-ai/tealtiger-typescript-prod.git
-# Python SDK:
-git clone https://github.com/agentguard-ai/tealtiger-python-prod.git
-
-# 3. Pick a "good first issue"
-# https://github.com/agentguard-ai/tealtiger/issues?q=label%3A%22good+first+issue%22
-
-# 4. Submit a PR
-# 5. Join the team 🐯
+npm install agentguard-sdk
 ```
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+### Python
+```bash
+pip install agentguard-sdk
+```
+
+## 📚 Examples
+
+### Cost Tracking Example
+
+```typescript
+import { GuardedOpenAI, CostTracker } from 'agentguard-sdk';
+
+const tracker = new CostTracker();
+const client = new GuardedOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  costTracker: tracker
+});
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4',
+  messages: [{ role: 'user', content: 'Explain quantum computing' }]
+});
+
+// Access cost information
+console.log(`Estimated cost: $${response.agentguard.cost.estimatedCost}`);
+console.log(`Tokens used: ${response.agentguard.cost.totalTokens}`);
+```
+
+### Budget Enforcement Example
+
+```typescript
+import { GuardedOpenAI, BudgetManager } from 'agentguard-sdk';
+
+const budgetManager = new BudgetManager();
+
+// Create a $50 monthly budget
+budgetManager.createBudget('my-agent', {
+  amount: 50.00,
+  period: 'monthly',
+  action: 'block',  // Block requests when limit reached
+  alertThresholds: [0.5, 0.75, 0.9]  // Alert at 50%, 75%, 90%
+});
+
+const client = new GuardedOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  agentId: 'my-agent',
+  budgetManager,
+  onBudgetAlert: (alert) => {
+    console.log(`⚠️ Budget alert: ${alert.percentage}% used`);
+  }
+});
+
+// Requests automatically tracked against budget
+const response = await client.chat.completions.create({
+  model: 'gpt-4',
+  messages: [{ role: 'user', content: 'Hello!' }]
+});
+```
+
+### Guardrails Example
+
+```typescript
+import { GuardedOpenAI, PIIDetectionGuardrail } from 'agentguard-sdk';
+
+const client = new GuardedOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  guardrails: [
+    new PIIDetectionGuardrail({
+      action: 'redact',  // Automatically redact PII
+      patterns: ['email', 'ssn', 'credit_card']
+    })
+  ]
+});
+
+// PII automatically detected and redacted
+const response = await client.chat.completions.create({
+  model: 'gpt-4',
+  messages: [{
+    role: 'user',
+    content: 'My email is john@example.com and SSN is 123-45-6789'
+  }]
+});
+
+// Check what was detected
+console.log('PII detected:', response.agentguard.guardrails.piiDetected);
+```
+
+## 📖 Documentation
+
+- **[Getting Started Guide](docs/getting-started.md)** - Complete setup and usage
+- **[FAQ](docs/FAQ.md)** - Frequently asked questions
+- **[Examples](examples/)** - Working code examples
+- **[Changelog](CHANGELOG.md)** - Version history and updates
+
+## �️ Roadmap
+
+### ✅ Phase 1: Developer SDK (v0.2.2) - COMPLETE
+- [x] Drop-in AI client wrappers (OpenAI, Anthropic, Azure OpenAI)
+- [x] Real-time cost tracking across 20+ models
+- [x] Budget management with enforcement
+- [x] Built-in guardrails (PII, content moderation, prompt injection)
+- [x] TypeScript and Python SDKs with 100% feature parity
+- [x] 504 comprehensive tests passing
+- [x] Complete documentation and examples
+
+### � Phase 2: Enterprise Platform (Q2-Q4 2026)
+- [ ] Hosted AgentGuard service (SaaS)
+- [ ] Database persistence for costs and budgets
+- [ ] Advanced analytics and cost optimization
+- [ ] Human-in-the-loop approval workflows
+- [ ] Cryptographic audit trails
+- [ ] Multi-user support with RBAC
+
+### 🔮 Phase 3: Market Leadership (2027)
+- [ ] Multi-framework support (LangChain, AutoGen, CrewAI)
+- [ ] Advanced threat detection with ML
+- [ ] Multi-cloud deployment
+- [ ] CISO governance dashboard
+- [ ] Compliance reporting (SOC 2, HIPAA, GDPR)
+
+**[📖 View full roadmap →](docs/ROADMAP.md)**
+
+## 🎯 Use Cases
+
+### For Startups
+- **Control AI Costs** - Prevent surprise bills from AI APIs
+- **Ship Faster** - Drop-in security without infrastructure
+- **Stay Compliant** - Built-in PII detection and content moderation
+
+### For Enterprises
+- **Budget Enforcement** - Set spending limits per team/agent
+- **Security Guardrails** - Prevent data leaks and harmful content
+- **Cost Visibility** - Track AI spending across organization
+
+### For Developers
+- **Easy Integration** - 2-minute setup, zero infrastructure
+- **Type Safety** - Full TypeScript support
+- **Framework Agnostic** - Works with any AI framework
+
+## 📊 Project Stats
+
+- **Performance**: <10ms overhead per request
+- **Test Coverage**: 90%+ (TypeScript), 84%+ (Python)
+- **Tests Passing**: 504 comprehensive tests
+- **Models Supported**: 20+ (OpenAI, Anthropic, Azure OpenAI)
+- **Languages**: TypeScript, Python (100% feature parity)
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 💬 Community & Support
+
+- **GitHub Issues** - [Report bugs and request features](https://github.com/nagasatish007/ai-agent-security-platform/issues)
+- **GitHub Discussions** - [Ask questions and share ideas](https://github.com/nagasatish007/ai-agent-security-platform/discussions)
+- **Documentation** - [Getting Started Guide](docs/getting-started.md)
+
+## � License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## � Links
+
+- **npm**: https://www.npmjs.com/package/agentguard-sdk
+- **PyPI**: https://pypi.org/project/agentguard-sdk/
+- **GitHub**: https://github.com/nagasatish007/ai-agent-security-platform
+- **Documentation**: [Getting Started](packages/agent-guard-sdk/README.md)
 
 ---
 
-## 🗺️ Roadmap
+**⭐ Star this repo if you find it useful!**
 
-**Current:** v1.3.0 — Autonomous Agent Governance (Released May 18, 2026)
-- TealEngine v1.3 with pre/post evaluation pipeline, FREEZE rules, automation levels
-- Non-Human Identity (NHI) governance with Zero Standing Privilege
-- TealProof — cryptographic governance receipts (Merkle + RFC 3161)
-- TealFlow — declarative YAML governance workflows
-- TealClassifier — local ONNX ML inference (≤20ms)
-- TealDrift, TealState, TealTemporal — behavioral, context, and session governance
-- TealMonitor v2 — governance-owned cost ceilings, anomaly detection
-- OWASP Agentic Top 10 policy pack (zero-config)
-- 12 LLM providers + 3 platform adapters (Bedrock, AgentCore, Azure)
-- Full Python SDK parity
-
-**Next:** v1.4.0 — Zero-Config Adoption
-- `observe()` mode — 1-line integration, instant visibility
-- Progressive disclosure: observe → suggest → enforce
-- Auto-baseline behavioral detection
-- Framework adapters (LangChain, CrewAI, AutoGen, LlamaIndex)
-- Developer experience overhaul
-
----
-
-## 🌟 Community
-
-- **Discord**: [Join TealTiger Community](https://discord.gg/X2ePf8QAj)
-- **GitHub Discussions**: [Ask questions, share ideas](https://github.com/agentguard-ai/tealtiger/discussions)
-- **LinkedIn**: [TealTiger](https://www.linkedin.com/company/tealtiger)
-- **X (Twitter)**: [@TealtigerAI](https://x.com/TealtigerAI)
-- **Documentation**: [docs.tealtiger.ai](https://docs.tealtiger.ai)
-- **Blog**: [blogs.tealtiger.ai](https://blogs.tealtiger.ai)
-- **Playground**: [playground.tealtiger.ai](https://playground.tealtiger.ai)
-- **Email**: reachout@tealtiger.ai
-
----
-
-## 📄 License
-
-TealTiger is [Apache 2.0 licensed](./LICENSE).
-
----
-
-## 🙏 Acknowledgments
-
-Built with ❤️ by the TealTiger team and [contributors](./CONTRIBUTORS.md).
-
----
-
-<div align="center">
-
-**⭐ Star this repo if you believe AI agents need governance, not just guardrails.**
-
-[Report Bug](https://github.com/agentguard-ai/tealtiger/issues/new?template=bug_report.md) · [Request Feature](https://github.com/agentguard-ai/tealtiger/issues/new?template=feature_request.md) · [Ask Question](https://github.com/agentguard-ai/tealtiger/issues/new?template=question.md)
-
-</div>
+**Made with ❤️ by developers who got tired of surprise AI bills**
